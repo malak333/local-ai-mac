@@ -1,0 +1,148 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=common.sh
+source "${SCRIPT_DIR}/common.sh"
+
+usage() {
+  cat <<'USAGE'
+Usage: scripts/local-ai <start|foreground|stop|status|logs>
+
+Environment overrides:
+  LOCAL_AI_MODEL        Hugging Face repo and quant
+  LOCAL_AI_CONTEXT      Context size (default: 16384)
+  LOCAL_AI_HOST         Bind address (default: 127.0.0.1)
+  LOCAL_AI_PORT         HTTP port (default: 8080)
+  LOCAL_AI_CACHE_RAM    Prompt-cache cap in MiB (default: 2048)
+USAGE
+}
+
+server_command() {
+  local llama_binary
+  local performance_threads
+  llama_binary="$(command -v llama)"
+  performance_threads="$(sysctl -n hw.perflevel0.physicalcpu 2>/dev/null || echo 6)"
+
+  printf '%s\0' \
+    "${llama_binary}" serve \
+    -hf "${LOCAL_AI_MODEL}" \
+    --no-mmproj \
+    --alias "${LOCAL_AI_MODEL_ALIAS}" \
+    --host "${LOCAL_AI_HOST}" \
+    --port "${LOCAL_AI_PORT}" \
+    --cors-origins localhost \
+    --no-cors-credentials \
+    --ctx-size "${LOCAL_AI_CONTEXT}" \
+    --n-gpu-layers 99 \
+    --parallel 1 \
+    --threads "${performance_threads}" \
+    --threads-batch "${performance_threads}" \
+    --flash-attn on \
+    --cache-type-k q4_0 \
+    --cache-type-v q4_0 \
+    --cache-ram "${LOCAL_AI_CACHE_RAM}" \
+    --jinja
+}
+
+run_foreground() {
+  local -a command_parts=()
+  while IFS= read -r -d '' part; do
+    command_parts+=("${part}")
+  done < <(server_command)
+  exec "${command_parts[@]}"
+}
+
+start_background() {
+  local -a command_parts=()
+  local pid
+
+  if local_ai_running; then
+    echo "Local AI server is already running (PID $(local_ai_pid))."
+    exit 0
+  fi
+
+  mkdir -p "${LOCAL_AI_STATE_DIR}"
+  while IFS= read -r -d '' part; do
+    command_parts+=("${part}")
+  done < <(server_command)
+
+  launchctl remove "${LOCAL_AI_LAUNCHD_LABEL}" >/dev/null 2>&1 || true
+  launchctl submit \
+    -l "${LOCAL_AI_LAUNCHD_LABEL}" \
+    -o "${LOCAL_AI_LOG_FILE}" \
+    -e "${LOCAL_AI_LOG_FILE}" \
+    -- "${command_parts[@]}"
+  pid=""
+  for _ in {1..10}; do
+    pid="$(local_ai_pid)"
+    [[ -n "${pid}" ]] && break
+    sleep 1
+  done
+  if [[ -z "${pid}" ]]; then
+    echo "launchd did not start the local AI server." >&2
+    exit 1
+  fi
+  printf '%s\n' "${pid}" > "${LOCAL_AI_PID_FILE}"
+  echo "Started local AI server (PID ${pid})."
+  echo "Log: ${LOCAL_AI_LOG_FILE}"
+  echo "The first start downloads about 20 GB and can take several minutes."
+
+  if local_ai_wait_ready 600 2; then
+    echo "Ready: ${LOCAL_AI_BASE_URL}"
+  else
+    echo "Server did not become ready in time. Inspect: scripts/local-ai logs" >&2
+    exit 1
+  fi
+}
+
+stop_background() {
+  local pid
+  pid="$(local_ai_pid)"
+  if [[ -z "${pid}" ]] || ! kill -0 "${pid}" 2>/dev/null; then
+    echo "Local AI server is not running."
+    rm -f "${LOCAL_AI_PID_FILE}"
+    exit 0
+  fi
+
+  launchctl remove "${LOCAL_AI_LAUNCHD_LABEL}"
+  for _ in {1..30}; do
+    if ! kill -0 "${pid}" 2>/dev/null; then
+      rm -f "${LOCAL_AI_PID_FILE}"
+      echo "Stopped local AI server."
+      exit 0
+    fi
+    sleep 1
+  done
+  echo "Server did not stop within 30 seconds (PID ${pid})." >&2
+  exit 1
+}
+
+show_status() {
+  if local_ai_running; then
+    echo "Process: running (PID $(local_ai_pid))"
+  else
+    echo "Process: stopped"
+  fi
+
+  if curl --fail --silent --max-time 2 "${LOCAL_AI_BASE_URL}/health" | jq .; then
+    echo "API: healthy (${LOCAL_AI_BASE_URL})"
+  else
+    echo "API: unavailable (${LOCAL_AI_BASE_URL})"
+    return 1
+  fi
+}
+
+case "${1:-}" in
+  start) start_background ;;
+  foreground) run_foreground ;;
+  stop) stop_background ;;
+  status) show_status ;;
+  logs)
+    mkdir -p "${LOCAL_AI_STATE_DIR}"
+    touch "${LOCAL_AI_LOG_FILE}"
+    tail -n 100 -f "${LOCAL_AI_LOG_FILE}"
+    ;;
+  *) usage; exit 2 ;;
+esac

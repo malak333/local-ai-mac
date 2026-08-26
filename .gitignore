@@ -1,0 +1,6 @@
+.DS_Store
+*.log
+*.pid
+results/*.json
+results/*.md
+!results/.gitkeep
