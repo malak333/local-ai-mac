@@ -151,6 +151,10 @@ make benchmark  # timestamped response and llama.cpp timing data
 See [the validation record](docs/VALIDATION.md) for the exact host, versions,
 live tool-call proof, OpenCode proof, and observed throughput from this install.
 
+See [the local agent evaluation](docs/AGENT-EVALUATION.md) for the first
+Assemblywright audits, observed failure modes, capability boundaries, and the
+recommended design for a disposable agentic-workflow harness.
+
 ## Sources
 
 - [llama.cpp installation](https://github.com/ggml-org/llama.cpp/blob/master/docs/install.md)
