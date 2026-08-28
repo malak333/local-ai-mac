@@ -12,7 +12,7 @@ Usage: scripts/local-ai <start|foreground|stop|status|logs>
 
 Environment overrides:
   LOCAL_AI_MODEL        Hugging Face repo and quant
-  LOCAL_AI_CONTEXT      Context size (default: 131072)
+  LOCAL_AI_CONTEXT      Context size (default: 262144)
   LOCAL_AI_HOST         Bind address (default: 127.0.0.1)
   LOCAL_AI_PORT         HTTP port (default: 8080)
   LOCAL_AI_CACHE_RAM    Prompt-cache cap in MiB (default: 2048)

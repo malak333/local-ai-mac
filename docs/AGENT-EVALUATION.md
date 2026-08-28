@@ -41,10 +41,10 @@ The baseline was validated on August 26-27, 2026.
 | Autostart at login | Disabled |
 
 That table describes the original evaluation baseline. On August 28, the
-runtime context was raised to 128K, web search/fetch were enabled, and all
-enabled OpenCode actions were changed to auto-approved. The historical findings
-below remain observations of the earlier sessions, not a fresh evaluation of
-the new web-enabled configuration.
+runtime context was ultimately raised to 256K, web search/fetch were enabled,
+and all enabled OpenCode actions were changed to auto-approved. The historical
+findings below remain observations of the earlier sessions, not a fresh
+evaluation of the new web-enabled configuration.
 
 The server uses full Metal offload, quantized KV cache, and a 2 GB prompt-cache
 cap. See [the validation record](VALIDATION.md) for exact versions and commands.
@@ -515,10 +515,11 @@ quality, context management, or authority-boundary errors.
 The initial recommendation was to test a 24K or 32K context on the current Mac
 while recording memory pressure, swap, latency, compaction rate, task
 completion, and human intervention count. Subsequent configuration experiments
-advanced first to 32K, then to 64K, and finally to an experimental 128K slot;
-see the validation record for the limits of those activation checks. The 128K
-smoke suite did not exercise a prompt larger than 64K, so it should not be read
-as a full-context stress test.
+advanced first to 32K, then to 64K, 128K, and finally an experimental 256K slot;
+see the validation record for the limits of those activation checks. The 256K
+smoke suite exercised only short prompts, so it should not be read as a
+full-context stress test or as proof that a 32 GB M1 Pro can sustain a filled
+256K context under a real development workload.
 
 ## Bottom line
 

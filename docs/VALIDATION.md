@@ -1,7 +1,7 @@
 # Validation record
 
 Initially validated locally on August 26, 2026 (America/New_York). The 32K,
-64K, and 128K context activations were validated on August 28, 2026.
+64K, 128K, and 256K context activations were validated on August 28, 2026.
 
 ## Host
 
@@ -139,10 +139,36 @@ the local-model/OpenCode path. It does not make retrieved content trustworthy,
 prove factual synthesis quality, or keep search queries and fetched content on
 the Mac.
 
+## 256K context activation
+
+Later on August 28, 2026, the committed server default and OpenCode provider
+limit were doubled from 131,072 to 262,144 tokens. The setup was reapplied and
+the transient launchd server was started. The live process command contained
+`--ctx-size 262144`, the server log reported `n_ctx_slot = 262144`, and
+`/v1/models` reported both `n_ctx: 262144` and `n_ctx_train: 262144`. The
+installed OpenCode configuration advertised the same 262,144-token context and
+the existing 4,096-token output limit.
+
+`make test`, `make health`, `make tool-test`, `make agent-smoke`, and
+`make web-smoke` all passed. These checks proved startup, deterministic
+completion, structured function calling, an OpenCode repository read, and live
+web search/fetch at the new configured ceiling. They did not submit anything
+close to a 256K prompt, fill the KV cache, or prove long-duration stability,
+compaction behavior, or improved task quality.
+
+After the smoke checks, `ps` reported 20,085,840 KiB resident for the llama.cpp
+process. `memory_pressure -Q` reported 19% system-wide memory free, and
+encrypted swap usage was 1,874.12 MiB. These are point-in-time, system-wide
+observations; the swap cannot be attributed solely to llama.cpp or the context
+increase. This setting exactly matches the model's reported training context
+and leaves no higher native context tier to test. It is an extreme ceiling
+experiment on a 32 GB M1 Pro, not a demonstrated safe capacity for full-context
+workloads.
+
 ## Current operating boundary
 
 - API: `http://127.0.0.1:8080`
-- Context: 128K, experimental
+- Context: 256K, experimental training-context ceiling
 - Parallel slots: one
 - Vision projector: disabled
 - MCP: disabled

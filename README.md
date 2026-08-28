@@ -7,7 +7,7 @@ OpenCode -> OpenAI-compatible localhost API -> llama.cpp/Metal -> Qwen3.6
 ```
 
 The current experimental default for this MacBook Pro (M1 Pro, 32 GB) is
-Qwen3.6-35B-A3B `IQ4_XS`, a 128K context, one inference slot, quantized KV
+Qwen3.6-35B-A3B `IQ4_XS`, a 256K context, one inference slot, quantized KV
 cache, and a 2 GB prompt-cache cap. The API binds only to `127.0.0.1`.
 
 ## Quick start
@@ -88,7 +88,12 @@ Recommended progression:
 | Initial baseline | 16K | Initial stability and tool-calling proof |
 | Intermediate | 32K | First context-doubling validation |
 | Intermediate | 64K | Second context-doubling validation |
-| Current experiment | 128K | Maximum practical experiment with critical memory monitoring |
+| Prior experiment | 128K | First six-figure context activation |
+| Current experiment | 256K | Training-context ceiling; extreme memory-pressure experiment |
+
+The 256K setting starts and passes the smoke suite, but those checks do not fill
+the context. Treat it as a ceiling experiment, not a proven long-session
+capacity. Monitor memory pressure and stop the server when it is not in use.
 
 Do not raise `iogpu.wired_limit_mb` initially. The current setup is designed to
 fit the default macOS GPU memory ceiling. Raising the ceiling requires an
@@ -142,8 +147,8 @@ context, and concurrency.
   and test tools first; MCP tool definitions consume scarce context.
 - The setup disables OpenCode's global skill catalog, subagents, and LSP tool.
   This machine has a large global skill collection whose discovered permission
-  entries can overflow even the 128K context. Core repository and web tools
-  remain available.
+  entries previously consumed essentially the full 128K context. Core
+  repository and web tools remain available.
 - The transient launchd job survives the launching terminal but does not start
   at login. A 20+ GB resident model should be an intentional workload on a
   32 GB laptop.
