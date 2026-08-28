@@ -1,6 +1,7 @@
 # Validation record
 
-Validated locally on August 26, 2026 (America/New_York).
+Initially validated locally on August 26, 2026 (America/New_York). The 32K
+context activation was validated on August 28, 2026.
 
 ## Host
 
@@ -57,10 +58,23 @@ GiB resident according to `ps`; system-wide encrypted swap usage was 1.66 GiB.
 That swap figure includes the rest of the running Mac and is not attributed
 solely to llama.cpp.
 
+## 32K context activation
+
+On August 28, 2026, the committed server default and OpenCode provider limit
+were raised together from 16,384 to 32,768 tokens. The setup was reapplied and
+the transient launchd server was restarted. The live process command contained
+`--ctx-size 32768`, and `/v1/models` reported `n_ctx: 32768`.
+
+The static checks, deterministic completion check, structured tool-call check,
+and OpenCode file-tool smoke test were rerun after the restart. This activation
+establishes that the 32K configuration loads and completes those checks; it does
+not supersede the 16K throughput measurements above or establish long-duration
+memory-pressure stability.
+
 ## Current operating boundary
 
 - API: `http://127.0.0.1:8080`
-- Context: 16K
+- Context: 32K
 - Parallel slots: one
 - Vision projector: disabled
 - MCP: disabled

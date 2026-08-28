@@ -7,7 +7,7 @@ OpenCode -> OpenAI-compatible localhost API -> llama.cpp/Metal -> Qwen3.6
 ```
 
 The default is tuned for this MacBook Pro (M1 Pro, 32 GB): Qwen3.6-35B-A3B
-`IQ4_XS`, a 16K context, one inference slot, quantized KV cache, and a 2 GB
+`IQ4_XS`, a 32K context, one inference slot, quantized KV cache, and a 2 GB
 prompt-cache cap. The API binds only to `127.0.0.1`.
 
 ## Quick start
@@ -69,7 +69,7 @@ Defaults live in `scripts/common.sh`. Override them for one run without editing
 the repository:
 
 ```bash
-LOCAL_AI_CONTEXT=32768 ./scripts/local-ai start
+LOCAL_AI_CONTEXT=16384 ./scripts/local-ai start
 LOCAL_AI_PORT=8081 ./scripts/local-ai foreground
 LOCAL_AI_MODEL='bartowski/Qwen_Qwen3.6-35B-A3B-GGUF:Q4_K_S' \
   ./scripts/local-ai foreground
@@ -82,12 +82,12 @@ Recommended progression:
 
 | Stage | Context | Use |
 |---|---:|---|
-| Baseline | 16K | Prove stability and tool calling |
-| Target | 24K-32K | Larger repositories if memory pressure stays green |
+| Prior baseline | 16K | Initial stability and tool-calling proof |
+| Current default | 32K | Larger repository tasks with memory monitoring |
 | Experimental | 48K+ | Only after measuring swap and latency |
 
-Do not raise `iogpu.wired_limit_mb` initially. The baseline is designed to fit
-the default macOS GPU memory ceiling. Raising the ceiling requires an
+Do not raise `iogpu.wired_limit_mb` initially. The current setup is designed to
+fit the default macOS GPU memory ceiling. Raising the ceiling requires an
 administrator password, resets on reboot, and should be treated as an explicit
 later experiment.
 
