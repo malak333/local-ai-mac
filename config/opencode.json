@@ -4,15 +4,11 @@
   "tools": {
     "skill": false,
     "task": false,
-    "webfetch": false,
-    "websearch": false,
+    "webfetch": true,
+    "websearch": true,
     "lsp": false
   },
-  "permission": {
-    "edit": "ask",
-    "bash": "ask",
-    "external_directory": "ask"
-  },
+  "permission": "allow",
   "provider": {
     "llama.cpp": {
       "npm": "@ai-sdk/openai-compatible",

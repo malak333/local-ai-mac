@@ -1,4 +1,4 @@
-.PHONY: setup start foreground stop status health tool-test agent-smoke benchmark test
+.PHONY: setup start foreground stop status health tool-test agent-smoke web-smoke benchmark test
 
 setup:
 	./scripts/setup.sh
@@ -23,6 +23,9 @@ tool-test:
 
 agent-smoke:
 	./scripts/opencode-smoke.sh
+
+web-smoke:
+	./scripts/opencode-web-smoke.sh
 
 benchmark:
 	./scripts/benchmark.sh

@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+real_opencode="${OPENCODE_REAL_BIN:-$(brew --prefix)/bin/opencode}"
+if [[ ! -x "${real_opencode}" ]]; then
+  echo "OpenCode executable not found: ${real_opencode}" >&2
+  exit 1
+fi
+
+export OPENCODE_ENABLE_EXA=1
+export OPENCODE_DISABLE_EXTERNAL_SKILLS=1
+exec "${real_opencode}" "$@"

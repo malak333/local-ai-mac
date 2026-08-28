@@ -6,6 +6,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 OPENCODE_CONFIG_DIR="${HOME}/.config/opencode"
 OPENCODE_CONFIG_FILE="${OPENCODE_CONFIG_DIR}/opencode.json"
+LOCAL_BIN_DIR="${HOME}/.local/bin"
+OPENCODE_WRAPPER_FILE="${LOCAL_BIN_DIR}/opencode"
 
 if [[ "$(uname -s)" != "Darwin" || "$(uname -m)" != "arm64" ]]; then
   echo "This setup requires an Apple Silicon Mac." >&2
@@ -26,7 +28,7 @@ if ! command -v llama >/dev/null 2>&1; then
   brew install llama.cpp
 fi
 
-if ! command -v opencode >/dev/null 2>&1; then
+if [[ ! -x "$(brew --prefix)/bin/opencode" ]]; then
   brew install anomalyco/tap/opencode
 fi
 
@@ -38,8 +40,19 @@ if [[ -e "${OPENCODE_CONFIG_FILE}" ]] && ! cmp -s "${REPO_DIR}/config/opencode.j
 fi
 cp "${REPO_DIR}/config/opencode.json" "${OPENCODE_CONFIG_FILE}"
 
+mkdir -p "${LOCAL_BIN_DIR}"
+if [[ -e "${OPENCODE_WRAPPER_FILE}" ]] \
+  && ! cmp -s "${REPO_DIR}/scripts/opencode-wrapper" "${OPENCODE_WRAPPER_FILE}"; then
+  backup="${OPENCODE_WRAPPER_FILE}.backup.$(date +%Y%m%d%H%M%S)"
+  cp "${OPENCODE_WRAPPER_FILE}" "${backup}"
+  echo "Backed up existing OpenCode launcher to ${backup}"
+fi
+cp "${REPO_DIR}/scripts/opencode-wrapper" "${OPENCODE_WRAPPER_FILE}"
+chmod 0755 "${OPENCODE_WRAPPER_FILE}"
+
 echo "llama.cpp: $(llama --version 2>&1 | head -n 1)"
 echo "OpenCode: $(opencode --version)"
 echo "OpenCode config: ${OPENCODE_CONFIG_FILE}"
+echo "OpenCode launcher: ${OPENCODE_WRAPPER_FILE}"
 echo
 echo "Setup complete. Run: make start"

@@ -43,8 +43,10 @@ a 262,144-token training context, a 16,384-token runtime context, and a
 The first OpenCode attempt exposed that this account's large global skill
 catalog added roughly 131K tokens to the tool description, overflowing the
 16K local context. The committed baseline disables the skill catalog,
-subagents, web tools, and LSP while retaining core repository read, search,
-edit, and shell tools. The end-to-end check passed after that change.
+subagents, and LSP while retaining core repository read, search, edit, and
+shell tools. Web tools were disabled in the initial baseline and enabled in the
+later activation recorded below. The end-to-end check passed after the initial
+reduction.
 
 ## Measured inference
 
@@ -111,6 +113,32 @@ system-wide observations; the swap figure cannot be attributed solely to this
 process or to the context increase. A 128K slot is a maximum practical
 experiment on this 32 GB machine and requires continued memory monitoring.
 
+## Web access and auto-approval activation
+
+Later on August 28, 2026, the installed OpenCode configuration enabled
+`websearch` and `webfetch` and changed every enabled OpenCode permission from
+interactive approval to `allow`. `opencode debug config` resolved repository
+read/search/edit, shell, external-directory, web-search, web-fetch, question,
+todo, and doom-loop permissions to `allow`; disabled skill, subagent, and LSP
+tools remained denied and unavailable.
+
+The installed `~/.local/bin/opencode` launcher exports
+`OPENCODE_ENABLE_EXA=1`, which makes hosted Exa search available to this local
+provider without an API key. It also exports
+`OPENCODE_DISABLE_EXTERNAL_SKILLS=1`. The latter is necessary on this account:
+the first live web test failed before a tool call because external Claude/agent
+skill permission entries expanded the request to 131,740 tokens, beyond the
+131,072-token server limit. With external discovery disabled, the serialized
+build-agent definition fell from approximately 457 KB to 2.6 KB.
+
+After reinstalling the launcher and configuration, `make web-smoke` completed
+without an approval prompt. The model called `websearch`, found
+`https://opencode.ai/docs/tools/`, called `webfetch` on that page, and returned
+`LOCAL_WEB_TOOLS_OK`. This proves live use of both configured web tools through
+the local-model/OpenCode path. It does not make retrieved content trustworthy,
+prove factual synthesis quality, or keep search queries and fetched content on
+the Mac.
+
 ## Current operating boundary
 
 - API: `http://127.0.0.1:8080`
@@ -119,4 +147,6 @@ experiment on this 32 GB machine and requires continued memory monitoring.
 - Vision projector: disabled
 - MCP: disabled
 - Autostart at login: disabled
-- OpenCode edits and shell commands: confirmation required
+- OpenCode skills, subagents, and LSP tool: disabled
+- OpenCode web search and fetch: enabled through hosted services
+- OpenCode enabled actions: auto-approved; no confirmation prompt

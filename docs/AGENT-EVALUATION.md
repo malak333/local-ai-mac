@@ -40,6 +40,12 @@ The baseline was validated on August 26-27, 2026.
 | Edit and shell permission | Confirmation required |
 | Autostart at login | Disabled |
 
+That table describes the original evaluation baseline. On August 28, the
+runtime context was raised to 128K, web search/fetch were enabled, and all
+enabled OpenCode actions were changed to auto-approved. The historical findings
+below remain observations of the earlier sessions, not a fresh evaluation of
+the new web-enabled configuration.
+
 The server uses full Metal offload, quantized KV cache, and a 2 GB prompt-cache
 cap. See [the validation record](VALIDATION.md) for exact versions and commands.
 
@@ -80,7 +86,7 @@ The first OpenCode configuration inherited a large global skill catalog. The
 tool descriptions alone added approximately 131K tokens, far beyond the local
 model's 16K runtime context.
 
-The committed baseline therefore disables:
+The initial baseline therefore disabled:
 
 - Skills
 - Subagents
@@ -88,12 +94,14 @@ The committed baseline therefore disables:
 - MCP servers
 - LSP tools
 
-Core repository reading, search, editing, and shell execution remain available.
-Edits, shell commands, and external-directory access require confirmation.
+Core repository reading, search, editing, and shell execution remained
+available. Edits, shell commands, and external-directory access originally
+required confirmation.
 
-This makes the local setup usable, but it also means the model has no current
-web data and less automated code navigation. Prompts and evaluation criteria
-must account for those limitations.
+The current configuration enables web search and fetch and auto-approves every
+enabled action. Skills, subagents, MCP, and LSP remain disabled. The OpenCode
+launcher suppresses external skill discovery because this Mac's large global
+skill collection otherwise expands the request past the 128K server limit.
 
 ## Behavioral experiments
 
@@ -258,8 +266,9 @@ The model initially disclosed that it lacked real-time information, but then
 offered vague, geographically confused, and apparently nonexistent options. It
 also repeated unnecessarily precise personal location information.
 
-**Conclusion:** a disclaimer does not prevent hallucination. The agent needs a
-behavioral contract that requires an authorized lookup or an explicit
+**Conclusion:** a disclaimer does not prevent hallucination. The current setup
+now supplies web search and fetch, but the agent still needs a behavioral
+contract that requires an authorized, cited lookup or an explicit
 `live_evidence_required` result when the answer depends on current businesses,
 hours, availability, prices, laws, schedules, or product specifications.
 
@@ -279,7 +288,7 @@ hours, availability, prices, laws, schedules, or product specifications.
 | Long-context work | Repeated compaction and state loss | Weak at 16K |
 | Code editing | Harness implementation failed | Not established |
 | Failure-state honesty | Failed writes and clean state reported | Promising |
-| Current-world knowledge | Hardware and local-data failures | Unreliable without sources |
+| Current-world knowledge | Hardware and local-data failures; web tools now available | Unreliable without authoritative sources |
 | Privacy minimization | Unnecessary precise location repetition | Needs an explicit contract |
 | End-to-end autonomous patching | No completed patch cycle | Not demonstrated |
 | Production reliability | Too few repeated trials | Unknown |
@@ -466,10 +475,13 @@ Local inference improves privacy, but OpenCode is not a sandbox.
 - The API is bound to localhost.
 - This provider does not send prompts to a cloud inference service.
 - Model weights remain outside Git.
-- No web or MCP tools are configured.
+- No MCP servers are configured.
+- Web search and fetch are enabled; queries, URLs, and retrieved content leave
+  the Mac through hosted search and destination websites.
 
-OpenCode can still read repository files and run host shell commands after
-approval. Evaluation and future agentic use should therefore:
+OpenCode can read repository files, write files, access external directories,
+and run host shell commands without approval. Evaluation and future agentic use
+should therefore:
 
 - Keep secrets out of accessible workspaces.
 - Exclude SSH agents, GitHub tokens, owner tokens, Keychain material, and
@@ -478,6 +490,7 @@ approval. Evaluation and future agentic use should therefore:
 - Clear the environment.
 - Restrict allowed paths and commands.
 - Treat repository documents as untrusted input.
+- Treat web results and fetched pages as untrusted input.
 - Bound execution and output.
 - Verify cleanup independently.
 - Avoid unnecessary precise personal information because local sessions and

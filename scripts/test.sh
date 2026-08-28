@@ -5,7 +5,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-for script in "${SCRIPT_DIR}"/*.sh "${SCRIPT_DIR}/local-ai"; do
+for script in "${SCRIPT_DIR}"/*.sh "${SCRIPT_DIR}/local-ai" "${SCRIPT_DIR}/opencode-wrapper"; do
   bash -n "${script}"
 done
 
@@ -28,6 +28,25 @@ configured_context="$(
 )"
 if [[ "${default_context}" != "${configured_context}" ]]; then
   echo "Server and OpenCode context limits do not match: ${default_context} != ${configured_context}" >&2
+  exit 1
+fi
+
+jq --exit-status '
+  .tools.webfetch == true
+  and .tools.websearch == true
+  and .permission == "allow"
+' "${REPO_DIR}/config/opencode.json" >/dev/null || {
+  echo "OpenCode web tools and full auto-approval are not enabled." >&2
+  exit 1
+}
+
+wrapper_environment="$(OPENCODE_REAL_BIN=/usr/bin/env "${SCRIPT_DIR}/opencode-wrapper")"
+if ! grep -qx 'OPENCODE_ENABLE_EXA=1' <<<"${wrapper_environment}"; then
+  echo "OpenCode launcher does not enable Exa web search." >&2
+  exit 1
+fi
+if ! grep -qx 'OPENCODE_DISABLE_EXTERNAL_SKILLS=1' <<<"${wrapper_environment}"; then
+  echo "OpenCode launcher does not suppress the oversized external skill catalog." >&2
   exit 1
 fi
 

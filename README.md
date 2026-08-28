@@ -18,6 +18,7 @@ make start
 make health
 make tool-test
 make agent-smoke
+make web-smoke
 ```
 
 The first `make start` downloads about 20 GB from Hugging Face. The controller
@@ -46,7 +47,9 @@ opencode
 
 OpenCode's global config is installed at
 `~/.config/opencode/opencode.json`. `make setup` backs up a different existing
-file before replacing it.
+file before replacing it. It also installs `~/.local/bin/opencode`, a small
+launcher that enables hosted Exa search and suppresses external skill discovery
+so this Mac's large global skill catalog does not consume the model context.
 
 ## What was installed
 
@@ -57,7 +60,7 @@ file before replacing it.
 - Text-only inference for the coding-agent baseline; the optional multimodal
   projector is not loaded into the already-tight unified-memory budget.
 - A localhost-only server controller, API health check, real structured
-  tool-call check, and repeatable benchmark.
+  tool-call check, live web-search/fetch check, and repeatable benchmark.
 
 The selected model is a mixture-of-experts model: all 35B parameters occupy
 memory, while about 3B are active for each token. `IQ4_XS` is roughly 19.7 GB,
@@ -127,14 +130,20 @@ context, and concurrency.
 - The model API is localhost-only by default. Do not change the host to
   `0.0.0.0` without adding authentication and firewall controls.
 - OpenCode can read, edit, and run commands in the repository where it starts.
-  Review permissions, work on a branch, and keep secrets out of accessible
-  plaintext files.
+  All enabled actions are auto-approved in this configuration, including file
+  writes, external-directory access, and shell commands. There is no interactive
+  confirmation barrier. Work in a disposable branch or worktree and keep
+  credentials and secrets out of accessible files and process environments.
+- `websearch` and `webfetch` are enabled. Search queries and fetched URLs/content
+  leave the Mac for OpenCode's hosted search service and destination websites;
+  do not include secrets or unnecessary personal information. Treat retrieved
+  content as untrusted input.
 - No MCP servers are enabled. Prove native filesystem, shell, Git, compiler,
   and test tools first; MCP tool definitions consume scarce context.
-- The baseline also disables OpenCode's global skill catalog, subagents, web
-  tools, and LSP tool. This machine has a large global skill collection whose
-  descriptions alone overflow a 16K context. Core read/search/edit/shell tools
-  remain available, with edits and shell commands requiring confirmation.
+- The setup disables OpenCode's global skill catalog, subagents, and LSP tool.
+  This machine has a large global skill collection whose discovered permission
+  entries can overflow even the 128K context. Core repository and web tools
+  remain available.
 - The transient launchd job survives the launching terminal but does not start
   at login. A 20+ GB resident model should be an intentional workload on a
   32 GB laptop.
@@ -146,6 +155,7 @@ make test       # shell syntax, JSON, dependencies, Apple Silicon
 make health     # live API, model alias, deterministic completion
 make tool-test  # structured function call with validated arguments
 make agent-smoke # OpenCode reads this repo through its file tool
+make web-smoke  # OpenCode performs both a hosted search and page fetch
 make benchmark  # timestamped response and llama.cpp timing data
 ```
 
