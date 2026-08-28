@@ -1,7 +1,7 @@
 # Validation record
 
-Initially validated locally on August 26, 2026 (America/New_York). The 32K and
-64K context activations were validated on August 28, 2026.
+Initially validated locally on August 26, 2026 (America/New_York). The 32K,
+64K, and 128K context activations were validated on August 28, 2026.
 
 ## Host
 
@@ -22,9 +22,9 @@ Initially validated locally on August 26, 2026 (America/New_York). The 32K and
 | OpenCode | 1.18.23 |
 | ShellCheck | 0.11.0 |
 
-The running model reported 35,505,251,456 parameters, a 262,144-token training
-context, a 16,384-token runtime context, and a 19,688,563,200-byte IQ4_XS
-weight file.
+At the initial baseline, the running model reported 35,505,251,456 parameters,
+a 262,144-token training context, a 16,384-token runtime context, and a
+19,688,563,200-byte IQ4_XS weight file.
 
 ## Passed checks
 
@@ -89,10 +89,32 @@ free memory and 1,930.12 MiB of encrypted swap in use. These are point-in-time,
 system-wide observations; the swap figure cannot be attributed solely to this
 process or to the context increase.
 
+## 128K context activation
+
+Later on August 28, 2026, the committed server default and OpenCode provider
+limit were doubled from 65,536 to 131,072 tokens. The setup was reapplied and
+the transient launchd server was restarted. The live process command contained
+`--ctx-size 131072`, the server log reported `n_ctx_slot = 131072`, and
+`/v1/models` reported `n_ctx: 131072`. The installed OpenCode configuration
+also advertised a 131,072-token context and a 4,096-token output limit.
+
+`make test`, `make health`, `make tool-test`, and `make agent-smoke` all passed
+after the restart. The checks proved a deterministic completion, a structured
+tool call with validated arguments, and an end-to-end OpenCode repository read.
+They did not submit a prompt larger than 64K, fill the 128K KV cache, or prove
+long-duration stability, better task quality, or freedom from compaction.
+
+Immediately after the smoke checks, `ps` reported 19,710,976 KiB of resident
+memory for the llama.cpp process. The system-wide memory snapshot reported 23%
+free memory and 1,890.12 MiB of encrypted swap in use. These are point-in-time,
+system-wide observations; the swap figure cannot be attributed solely to this
+process or to the context increase. A 128K slot is a maximum practical
+experiment on this 32 GB machine and requires continued memory monitoring.
+
 ## Current operating boundary
 
 - API: `http://127.0.0.1:8080`
-- Context: 64K
+- Context: 128K, experimental
 - Parallel slots: one
 - Vision projector: disabled
 - MCP: disabled

@@ -502,8 +502,10 @@ quality, context management, or authority-boundary errors.
 The initial recommendation was to test a 24K or 32K context on the current Mac
 while recording memory pressure, swap, latency, compaction rate, task
 completion, and human intervention count. Subsequent configuration experiments
-advanced first to 32K and then to 64K; see the validation record for the limits
-of those activation checks.
+advanced first to 32K, then to 64K, and finally to an experimental 128K slot;
+see the validation record for the limits of those activation checks. The 128K
+smoke suite did not exercise a prompt larger than 64K, so it should not be read
+as a full-context stress test.
 
 ## Bottom line
 
