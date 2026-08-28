@@ -499,9 +499,11 @@ A larger Mac primarily buys:
 It does not automatically fix hallucination, evidence discipline, prompt
 quality, context management, or authority-boundary errors.
 
-Before purchasing hardware for this workflow, test a 24K or 32K context on the
-current Mac while recording memory pressure, swap, latency, compaction rate,
-task completion, and human intervention count.
+The initial recommendation was to test a 24K or 32K context on the current Mac
+while recording memory pressure, swap, latency, compaction rate, task
+completion, and human intervention count. Subsequent configuration experiments
+advanced first to 32K and then to 64K; see the validation record for the limits
+of those activation checks.
 
 ## Bottom line
 
