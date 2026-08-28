@@ -156,8 +156,8 @@ web search/fetch at the new configured ceiling. They did not submit anything
 close to a 256K prompt, fill the KV cache, or prove long-duration stability,
 compaction behavior, or improved task quality.
 
-After the smoke checks, `ps` reported 20,085,840 KiB resident for the llama.cpp
-process. `memory_pressure -Q` reported 19% system-wide memory free, and
+After the full smoke suite, `ps` reported 21,056,304 KiB resident for the
+llama.cpp process. `memory_pressure -Q` reported 17% system-wide memory free, and
 encrypted swap usage was 1,874.12 MiB. These are point-in-time, system-wide
 observations; the swap cannot be attributed solely to llama.cpp or the context
 increase. This setting exactly matches the model's reported training context
