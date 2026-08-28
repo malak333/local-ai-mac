@@ -165,6 +165,34 @@ and leaves no higher native context tier to test. It is an extreme ceiling
 experiment on a 32 GB M1 Pro, not a demonstrated safe capacity for full-context
 workloads.
 
+## Conservative OpenCode tuning activation
+
+Later on August 28, 2026, the installed OpenCode configuration was tightened
+around the existing fully auto-approved tool policy. The resolved configuration
+proved all of the following values:
+
+- only the `llama.cpp` provider enabled;
+- session sharing disabled, snapshots enabled, and OpenCode self-update
+  disabled for the Homebrew-managed installation;
+- build-agent temperature `0.1` with a 24-iteration ceiling;
+- automatic compaction enabled, old tool-output pruning disabled, and 16,384
+  tokens reserved for compaction and response headroom;
+- a 900,000 ms local-provider request timeout; and
+- watcher exclusions for `.git`, Rust `target`, Swift `.build`, Xcode
+  `DerivedData`, Node dependencies, and distribution output.
+
+`make test`, `make health`, `make tool-test`, `make agent-smoke`, and
+`make web-smoke` all passed after installation. The OpenCode smoke test used the
+repository-read tool, and the web smoke test used both `websearch` and
+`webfetch`. `/v1/models` continued to report `n_ctx: 262144` and
+`n_ctx_train: 262144`.
+
+After the suite, llama.cpp was still running with 20,968,912 KiB resident;
+`memory_pressure -Q` reported 17% system-wide memory free and encrypted swap
+usage remained 1,874.12 MiB. These checks did not force compaction, exhaust all
+24 agent iterations, test a request near the 15-minute timeout, or prove that
+session sharing is impossible through mechanisms outside OpenCode.
+
 ## Current operating boundary
 
 - API: `http://127.0.0.1:8080`
@@ -176,3 +204,6 @@ workloads.
 - OpenCode skills, subagents, and LSP tool: disabled
 - OpenCode web search and fetch: enabled through hosted services
 - OpenCode enabled actions: auto-approved; no confirmation prompt
+- OpenCode sharing: disabled
+- OpenCode build agent: temperature 0.1, 24-iteration ceiling
+- OpenCode compaction: automatic, 16K reserved, tool-output pruning disabled

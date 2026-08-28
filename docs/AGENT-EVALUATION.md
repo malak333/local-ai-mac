@@ -102,6 +102,10 @@ The current configuration enables web search and fetch and auto-approves every
 enabled action. Skills, subagents, MCP, and LSP remain disabled. The OpenCode
 launcher suppresses external skill discovery because this Mac's large global
 skill collection otherwise expands the request past the 128K server limit.
+The build agent now uses temperature `0.1`, a 24-iteration ceiling, automatic
+compaction with 16K reserved, disabled sharing, snapshots, a local-provider
+allowlist, and a 15-minute provider timeout. These controls bound and stabilize
+the interface; they do not make the model or its host commands trustworthy.
 
 ## Behavioral experiments
 

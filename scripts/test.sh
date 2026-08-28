@@ -35,8 +35,24 @@ jq --exit-status '
   .tools.webfetch == true
   and .tools.websearch == true
   and .permission == "allow"
+  and .enabled_providers == ["llama.cpp"]
+  and .share == "disabled"
+  and .autoupdate == false
+  and .snapshot == true
+  and .compaction == {"auto": true, "prune": false, "reserved": 16384}
+  and .agent.build.temperature == 0.1
+  and .agent.build.steps == 24
+  and .provider["llama.cpp"].options.timeout == 900000
+  and (.watcher.ignore | sort) == ([
+    ".git/**",
+    "target/**",
+    ".build/**",
+    "DerivedData/**",
+    "node_modules/**",
+    "dist/**"
+  ] | sort)
 ' "${REPO_DIR}/config/opencode.json" >/dev/null || {
-  echo "OpenCode web tools and full auto-approval are not enabled." >&2
+  echo "OpenCode safety, determinism, and runtime tuning is incomplete." >&2
   exit 1
 }
 

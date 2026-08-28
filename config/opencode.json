@@ -1,6 +1,33 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "model": "llama.cpp/qwen36-local",
+  "enabled_providers": [
+    "llama.cpp"
+  ],
+  "share": "disabled",
+  "autoupdate": false,
+  "snapshot": true,
+  "compaction": {
+    "auto": true,
+    "prune": false,
+    "reserved": 16384
+  },
+  "watcher": {
+    "ignore": [
+      ".git/**",
+      "target/**",
+      ".build/**",
+      "DerivedData/**",
+      "node_modules/**",
+      "dist/**"
+    ]
+  },
+  "agent": {
+    "build": {
+      "temperature": 0.1,
+      "steps": 24
+    }
+  },
   "tools": {
     "skill": false,
     "task": false,
@@ -14,7 +41,8 @@
       "npm": "@ai-sdk/openai-compatible",
       "name": "Local M1 Pro",
       "options": {
-        "baseURL": "http://127.0.0.1:8080/v1"
+        "baseURL": "http://127.0.0.1:8080/v1",
+        "timeout": 900000
       },
       "models": {
         "qwen36-local": {

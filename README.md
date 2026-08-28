@@ -81,6 +81,22 @@ LOCAL_AI_MODEL='bartowski/Qwen_Qwen3.6-35B-A3B-GGUF:Q4_K_S' \
 When changing the context or port, update `config/opencode.json` and rerun
 `make setup` so OpenCode advertises the same limits and endpoint.
 
+The installed OpenCode defaults are intentionally conservative around the
+auto-approved tool surface:
+
+- Only the configured `llama.cpp` provider is enabled, sharing is disabled,
+  snapshots remain enabled, and OpenCode self-updates are disabled because the
+  binary is managed by Homebrew.
+- The build agent uses temperature `0.1` and stops after 24 agentic iterations.
+- Automatic compaction preserves old tool outputs and reserves 16K tokens for
+  compaction and response headroom.
+- Local-provider requests have a 15-minute timeout.
+- Common Git, Rust, Swift, Xcode, Node, and distribution output directories are
+  excluded from file watching.
+
+The step ceiling is an agent-loop limit, not a wall-clock or process-runtime
+limit. Continue using an independent timeout for unattended evaluations.
+
 Recommended progression:
 
 | Stage | Context | Use |
