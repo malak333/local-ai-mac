@@ -29,7 +29,7 @@
       "temperature": 0.1,
       "steps": 96
     },
-    "max_steps": 96,
+    "max_steps": 320,
     "max_absolute_steps": 256,
     "auto_extend_steps": true,
     "step_extension": 32,

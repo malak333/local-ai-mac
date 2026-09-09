@@ -144,7 +144,7 @@ jq --exit-status '
 
 # Validate agent guardrails configuration
 jq --exit-status '
-  .agent.max_steps == 96
+  .agent.max_steps == 320
   and .agent.max_absolute_steps == 256
   and .agent.auto_extend_steps == true
   and .agent.step_extension == 32

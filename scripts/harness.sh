@@ -270,10 +270,14 @@ harness_check_step_limit() {
     return 2
   fi
 
+  # Calculate current soft limit, including extensions
+  local effective_max
+  effective_max="$(harness_get_effective_max_steps)"
+
   # Soft limit with progress awareness
-  if [[ "${HARNESS_CURRENT_STEP}" -ge "${HARNESS_MAX_STEPS}" ]]; then
+  if [[ "${HARNESS_CURRENT_STEP}" -ge "${effective_max}" ]]; then
     if [[ "${HARNESS_AUTO_EXTEND:-true}" != "true" ]]; then
-      harness_error "Step limit reached: ${HARNESS_CURRENT_STEP} >= ${HARNESS_MAX_STEPS}"
+      harness_error "Step limit reached with insufficient progress: ${HARNESS_CURRENT_STEP} >= ${effective_max}"
       return 1
     fi
 
@@ -315,7 +319,7 @@ harness_check_step_limit() {
       fi
     fi
 
-    harness_error "Soft step limit reached with insufficient progress: ${HARNESS_CURRENT_STEP} >= ${HARNESS_MAX_STEPS}"
+    harness_error "Soft step limit reached with insufficient progress: ${HARNESS_CURRENT_STEP} >= ${effective_max}"
     return 1
   fi
 
