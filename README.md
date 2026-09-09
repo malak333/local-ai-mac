@@ -57,8 +57,9 @@ so this Mac's large global skill catalog does not consume the model context.
 - OpenCode from the vendor's Homebrew tap.
 - Qwen3.6-35B-A3B `IQ4_XS` from Hugging Face. Model weights remain in the
   llama.cpp cache and are never committed to Git.
-- Text-only inference for the coding-agent baseline; the optional multimodal
-  projector is not loaded into the already-tight unified-memory budget.
+- The matching Qwen3.6 f16 multimodal projector, pinned by SHA-256 and stored in
+  the local runtime cache. This enables image input through the same localhost
+  API while keeping the model weights and projector out of Git.
 - A localhost-only server controller, API health check, real structured
   tool-call check, live web-search/fetch check, and repeatable benchmark.
 
@@ -76,7 +77,15 @@ LOCAL_AI_CONTEXT=65536 ./scripts/local-ai start
 LOCAL_AI_PORT=8081 ./scripts/local-ai foreground
 LOCAL_AI_MODEL='bartowski/Qwen_Qwen3.6-35B-A3B-GGUF:Q4_K_S' \
   ./scripts/local-ai foreground
+LOCAL_AI_DISABLE_VISION=1 ./scripts/local-ai foreground
 ```
+
+Quantization overrides from the same Qwen3.6 repository reuse its matching
+projector. A model from another repository must provide matching
+`LOCAL_AI_MMPROJ` and `LOCAL_AI_MMPROJ_SHA256` values (plus
+`LOCAL_AI_MMPROJ_URL` when the file is not already present), or explicitly set
+`LOCAL_AI_DISABLE_VISION=1`. This prevents a custom model from silently loading
+the Qwen3.6 projector.
 
 When changing the context or port, update `config/opencode.json` and rerun
 `make setup` so OpenCode advertises the same limits and endpoint.

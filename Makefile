@@ -1,4 +1,4 @@
-.PHONY: setup start foreground stop status health tool-test agent-smoke web-smoke benchmark test
+.PHONY: setup start foreground stop status health tool-test agent-smoke web-smoke benchmark test harness
 
 setup:
 	./scripts/setup.sh
@@ -32,3 +32,6 @@ benchmark:
 
 test:
 	./scripts/test.sh
+
+harness:
+	./scripts/harness.sh

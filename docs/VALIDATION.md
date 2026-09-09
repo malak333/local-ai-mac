@@ -193,12 +193,37 @@ usage remained 1,874.12 MiB. These checks did not force compaction, exhaust all
 24 agent iterations, test a request near the 15-minute timeout, or prove that
 session sharing is impossible through mechanisms outside OpenCode.
 
+## Vision projector activation
+
+On September 7, 2026, the matching Qwen3.6 f16 multimodal projector was pinned
+to its Hugging Face LFS SHA-256 and downloaded into the local runtime cache. The
+controller now passes its exact local path with `--mmproj`; `/props` reported
+`modalities.vision: true`, and `/v1/models` retained the `qwen36-local` alias,
+one 262,144-token slot, and the IQ4_XS model.
+
+A live request containing a generated 256-by-256 red PNG returned `red`. A
+separate OCR request against a 384-pixel-downscaled application screenshot
+incorrectly returned `Visual Studio Code`, so the activation proves image input
+and simple visual recognition, not reliable UI screenshot interpretation.
+
+Static coverage verifies that another model repository cannot silently reuse
+the Qwen3.6 projector, explicit text-only overrides remain available, projector
+preflight failures propagate before launch, and both fresh and already-running
+servers must report the requested `/props` vision capability. A matching-model
+quantization override continues to reuse the matching projector.
+
+After the image, deterministic text, and structured tool-call checks, the idle
+llama.cpp process reported 21,341,984 KiB resident. `memory_pressure -Q`
+reported 17% system-wide memory free, and encrypted swap usage was 1,536.44
+MiB. These are one point-in-time host observations; they do not prove sustained
+full-context stability or attribute system swap to this process alone.
+
 ## Current operating boundary
 
 - API: `http://127.0.0.1:8080`
 - Context: 256K, experimental training-context ceiling
 - Parallel slots: one
-- Vision projector: disabled
+- Vision projector: matching Qwen3.6 f16 projector enabled by default
 - MCP: disabled
 - Autostart at login: disabled
 - OpenCode skills, subagents, and LSP tool: disabled

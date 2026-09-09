@@ -10,7 +10,9 @@
   "compaction": {
     "auto": true,
     "prune": false,
-    "reserved": 16384
+    "reserved": 16384,
+    "threshold": 0.75,
+    "strategy": "summarize"
   },
   "watcher": {
     "ignore": [
@@ -25,7 +27,46 @@
   "agent": {
     "build": {
       "temperature": 0.1,
-      "steps": 24
+      "steps": 96
+    },
+    "max_steps": 96,
+    "max_absolute_steps": 256,
+    "auto_extend_steps": true,
+    "step_extension": 32,
+    "max_no_progress_steps": 8,
+    "max_identical_actions": 3,
+    "max_consecutive_errors": 5,
+    "task_timeout_minutes": 60,
+    "command_retries": 2,
+    "test_retries": 3,
+    "context_compaction": true,
+    "context_compaction_threshold": 0.75,
+    "context_reserve": 0.15,
+    "checkpoint_every_steps": 10,
+    "checkpoint_before_risky_action": true,
+    "use_git_worktree": true,
+    "auto_commit_checkpoints": true,
+    "rollback_on_failure": true,
+    "run_tests_before_complete": true,
+    "run_lint_before_complete": true,
+    "self_review_before_complete": true,
+    "stuck_detection": {
+      "enabled": true,
+      "repeated_error_limit": 3,
+      "repeated_command_limit": 3,
+      "no_diff_limit": 5,
+      "on_stuck": [
+        "summarize_problem",
+        "reread_relevant_code",
+        "create_new_plan",
+        "retry"
+      ]
+    },
+    "progress_tracking": {
+      "enabled": true,
+      "track_failing_tests": true,
+      "track_diff_changes": true,
+      "log_progress_interval": 5
     }
   },
   "tools": {

@@ -16,19 +16,30 @@ Environment overrides:
   LOCAL_AI_HOST         Bind address (default: 127.0.0.1)
   LOCAL_AI_PORT         HTTP port (default: 8080)
   LOCAL_AI_CACHE_RAM    Prompt-cache cap in MiB (default: 2048)
+  LOCAL_AI_MMPROJ       Matching local projector path
+  LOCAL_AI_MMPROJ_URL   Projector download URL when the file is absent
+  LOCAL_AI_MMPROJ_SHA256 Expected projector SHA-256
+  LOCAL_AI_DISABLE_VISION Set to 1 to explicitly run text-only
 USAGE
 }
 
 server_command() {
   local llama_binary
   local performance_threads
+  local -a projector_args=()
+
+  if [[ "${LOCAL_AI_DISABLE_VISION}" == "1" ]]; then
+    projector_args=(--no-mmproj)
+  else
+    projector_args=(--mmproj "${LOCAL_AI_MMPROJ}")
+  fi
   llama_binary="$(command -v llama)"
   performance_threads="$(sysctl -n hw.perflevel0.physicalcpu 2>/dev/null || echo 6)"
 
   printf '%s\0' \
     "${llama_binary}" serve \
     -hf "${LOCAL_AI_MODEL}" \
-    --no-mmproj \
+    "${projector_args[@]}" \
     --alias "${LOCAL_AI_MODEL_ALIAS}" \
     --host "${LOCAL_AI_HOST}" \
     --port "${LOCAL_AI_PORT}" \
@@ -48,6 +59,7 @@ server_command() {
 
 run_foreground() {
   local -a command_parts=()
+  local_ai_ensure_projector
   while IFS= read -r -d '' part; do
     command_parts+=("${part}")
   done < <(server_command)
@@ -59,10 +71,16 @@ start_background() {
   local pid
 
   if local_ai_running; then
-    echo "Local AI server is already running (PID $(local_ai_pid))."
-    exit 0
+    local_ai_validate_projector_configuration
+    if local_ai_runtime_matches_configuration; then
+      echo "Local AI server is already running with the requested projector configuration (PID $(local_ai_pid))."
+      exit 0
+    fi
+    echo "Local AI server is running with a different projector configuration (PID $(local_ai_pid)); check /slots, then run scripts/local-ai stop followed by scripts/local-ai start." >&2
+    exit 1
   fi
 
+  local_ai_ensure_projector
   mkdir -p "${LOCAL_AI_STATE_DIR}"
   while IFS= read -r -d '' part; do
     command_parts+=("${part}")
