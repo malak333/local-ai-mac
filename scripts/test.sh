@@ -127,7 +127,7 @@ jq --exit-status '
   and .snapshot == true
   and (.compaction.auto == true and .compaction.prune == false and .compaction.reserved == 16384 and .compaction.threshold == 0.75)
   and .agent.build.temperature == 0.1
-  and .agent.build.steps == 96
+  and .agent.build.steps == 192
   and .provider["llama.cpp"].options.timeout == 900000
   and (.watcher.ignore | sort) == ([
     ".git/**",
@@ -144,10 +144,10 @@ jq --exit-status '
 
 # Validate agent guardrails configuration
 jq --exit-status '
-  .agent.max_steps == 320
-  and .agent.max_absolute_steps == 256
+  .agent.max_steps == 640
+  and .agent.max_absolute_steps == 512
   and .agent.auto_extend_steps == true
-  and .agent.step_extension == 32
+  and .agent.step_extension == 64
   and .agent.max_no_progress_steps == 8
   and .agent.max_identical_actions == 3
   and .agent.max_consecutive_errors == 5

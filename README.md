@@ -96,7 +96,7 @@ auto-approved tool surface:
 - Only the configured `llama.cpp` provider is enabled, sharing is disabled,
   snapshots remain enabled, and OpenCode self-updates are disabled because the
   binary is managed by Homebrew.
-- The build agent uses temperature `0.1` and stops after 24 agentic iterations.
+- The build agent uses temperature `0.1` and stops after 192 agentic iterations (soft limit: 640, absolute: 512).
 - Automatic compaction preserves old tool outputs and reserves 16K tokens for
   compaction and response headroom.
 - Local-provider requests have a 15-minute timeout.

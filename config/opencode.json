@@ -27,12 +27,12 @@
   "agent": {
     "build": {
       "temperature": 0.1,
-      "steps": 96
+      "steps": 192
     },
-    "max_steps": 320,
-    "max_absolute_steps": 256,
+    "max_steps": 640,
+    "max_absolute_steps": 512,
     "auto_extend_steps": true,
-    "step_extension": 32,
+    "step_extension": 64,
     "max_no_progress_steps": 8,
     "max_identical_actions": 3,
     "max_consecutive_errors": 5,
