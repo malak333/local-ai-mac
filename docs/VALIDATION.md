@@ -218,13 +218,29 @@ reported 17% system-wide memory free, and encrypted swap usage was 1,536.44
 MiB. These are one point-in-time host observations; they do not prove sustained
 full-context stability or attribute system swap to this process alone.
 
+## MCP server activation (computer-use + opencode-chromium)
+
+On September 10, 2026, two MCP servers were added to the OpenCode configuration:
+
+- `computer-use` (local): `npx -y computer-use-mcp` for desktop automation (mouse, keyboard, screenshots)
+- `opencode-browser-plugin` (local): `opencode-chromium-mcp` for browser automation (DOM interaction, JavaScript execution)
+- `opencode-chromium` added to the `plugin` array for native OpenCode adapter support
+
+The `computer-use-mcp` package runs via npx and does not require a global install. The `opencode-chromium` package was installed globally (`npm install -g opencode-chromium`) to provide both the native plugin adapter and the `opencode-chromium-mcp` binary.
+
+macOS Screen Recording and Accessibility permissions are required for the terminal application used with OpenCode (e.g., Terminal.app, Ghostty, iTerm2, WezTerm) for `computer-use-mcp` to function.
+
+These MCP servers were added after the initial evaluation and are not yet validated against the held-out evaluation suite. They are considered experimental on this configuration.
+
+**Note**: MCP servers add to context size. Only enable the servers you need.
+
 ## Current operating boundary
 
 - API: `http://127.0.0.1:8080`
 - Context: 256K, experimental training-context ceiling
 - Parallel slots: one
 - Vision projector: matching Qwen3.6 f16 projector enabled by default
-- MCP: disabled
+- MCP: enabled — `computer-use`, `opencode-browser-plugin`
 - Autostart at login: disabled
 - OpenCode skills, subagents, and LSP tool: disabled
 - OpenCode web search and fetch: enabled through hosted services
@@ -232,3 +248,4 @@ full-context stability or attribute system swap to this process alone.
 - OpenCode sharing: disabled
 - OpenCode build agent: temperature 0.1, 24-iteration ceiling
 - OpenCode compaction: automatic, 16K reserved, tool-output pruning disabled
+- Plugin: `opencode-chromium`

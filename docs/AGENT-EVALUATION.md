@@ -36,7 +36,7 @@ The baseline was validated on August 26-27, 2026.
 | Advertised output limit | 4,096 tokens |
 | Parallel slots | One |
 | Vision projector | Disabled |
-| MCP, web, LSP, skills, subagents | Disabled |
+| MCP, web, LSP, skills, subagents | Disabled (baseline); web enabled; MCP + opencode-chromium added Sep 10 |
 | Edit and shell permission | Confirmation required |
 | Autostart at login | Disabled |
 
@@ -99,7 +99,8 @@ available. Edits, shell commands, and external-directory access originally
 required confirmation.
 
 The current configuration enables web search and fetch and auto-approves every
-enabled action. Skills, subagents, MCP, and LSP remain disabled. The OpenCode
+enabled action. Skills, subagents, and LSP remain disabled. MCP servers
+(computer-use, opencode-browser-plugin) were added on September 10. The OpenCode
 launcher suppresses external skill discovery because this Mac's large global
 skill collection otherwise expands the request past the 128K server limit.
 The build agent now uses temperature `0.1`, a 24-iteration ceiling, automatic
@@ -479,7 +480,7 @@ Local inference improves privacy, but OpenCode is not a sandbox.
 - The API is bound to localhost.
 - This provider does not send prompts to a cloud inference service.
 - Model weights remain outside Git.
-- No MCP servers are configured.
+- No MCP servers are configured. (MCP servers computer-use and opencode-browser-plugin were added September 10; they run locally and do not transmit data externally.)
 - Web search and fetch are enabled; queries, URLs, and retrieved content leave
   the Mac through hosted search and destination websites.
 

@@ -76,6 +76,19 @@
     "websearch": true,
     "lsp": false
   },
+  "plugin": ["opencode-chromium"],
+  "mcp": {
+    "computer-use": {
+      "type": "local",
+      "command": ["npx", "-y", "computer-use-mcp"],
+      "enabled": true
+    },
+    "opencode-browser-plugin": {
+      "type": "local",
+      "command": ["opencode-chromium-mcp"],
+      "enabled": true
+    }
+  },
   "permission": "allow",
   "provider": {
     "llama.cpp": {
