@@ -54,5 +54,6 @@ echo "llama.cpp: $(llama --version 2>&1 | head -n 1)"
 echo "OpenCode: $(opencode --version)"
 echo "OpenCode config: ${OPENCODE_CONFIG_FILE}"
 echo "OpenCode launcher: ${OPENCODE_WRAPPER_FILE}"
+echo "OpenCode max_steps: $(jq -r '.agent.max_steps' "${OPENCODE_CONFIG_FILE}")"
 echo
 echo "Setup complete. Run: make start"
